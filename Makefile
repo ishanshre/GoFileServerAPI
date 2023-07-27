@@ -16,4 +16,4 @@ stopContainer:
 	docker stop GoFileServerAPI GoFileServertRedis
 
 run:
-	go run cmd/api/main.go
+	go run cmd/api/main.go -p=8080
