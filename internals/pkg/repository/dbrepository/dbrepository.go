@@ -2,6 +2,7 @@ package dbrepository
 
 import (
 	"context"
+	"time"
 
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/database"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/repository"
@@ -18,3 +19,5 @@ func NewMongoDbRepo(db database.Database, ctx context.Context) repository.Reposi
 		ctx: ctx,
 	}
 }
+
+const timeout = 3 * time.Second
