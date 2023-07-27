@@ -8,7 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Database interface{}
+type Database interface {
+	GetUserCollection() *mongo.Collection
+	GetFileCollection() *mongo.Collection
+}
 
 type database struct {
 	client *mongo.Client
