@@ -20,9 +20,9 @@ type User struct {
 }
 
 type CreateUser struct {
-	Email    string `json:"email,omitempty" bson:"email,omitempty"`
-	Username string `json:"username,omitempty" bson:"username,omitempty,unique"`
-	Password string `json:"password,omitempty" bson:"password,omitempty"`
+	Email    string `json:"email,omitempty" bson:"email,omitempty" validate:"required,email"`
+	Username string `json:"username,omitempty" bson:"username,omitempty,unique" validate:"required,min=5"`
+	Password string `json:"password,omitempty" bson:"password,omitempty" validate:"required,min=8,max=30,containsany=!@#$%^&*(),uppercase,lowercase,number"`
 }
 
 type File struct {

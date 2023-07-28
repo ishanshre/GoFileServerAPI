@@ -85,6 +85,18 @@ func (m *mongoDbRepo) UsernameExists(username string) error {
 	return nil
 }
 
+func (m *mongoDbRepo) EmailExists(email string) error {
+	ctx, cancel := context.WithTimeout(m.ctx, timeout)
+	defer cancel()
+
+	query := bson.M{"email": email}
+	existingUser := &models.User{}
+	if err := m.db.GetUserCollection().FindOne(ctx, query).Decode(&existingUser); err == nil {
+		return errors.New("email exists")
+	}
+	return nil
+}
+
 func (m *mongoDbRepo) DeleteUser(username string) error {
 	ctx, cancel := context.WithTimeout(m.ctx, timeout)
 	defer cancel()

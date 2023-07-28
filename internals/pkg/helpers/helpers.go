@@ -32,3 +32,17 @@ func StatusUnauthorized(w http.ResponseWriter, message string) {
 		Message:       message,
 	})
 }
+
+func StatusBadRequest(w http.ResponseWriter, message string) {
+	WriteJson(w, http.StatusBadRequest, Message{
+		MessageStatus: "error",
+		Message:       message,
+	})
+}
+
+func StatusCreatedData(w http.ResponseWriter, data any) {
+	WriteJson(w, http.StatusCreated, Message{
+		MessageStatus: "success",
+		Data:          data,
+	})
+}
