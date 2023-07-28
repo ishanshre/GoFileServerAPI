@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+type ContextKey string
+
 type Message struct {
 	MessageStatus string `json:"status,omitempty"`
 	Message       string `json:"message,omitempty"`
@@ -15,4 +17,18 @@ func WriteJson(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
+}
+
+func StatusInternalServerError(w http.ResponseWriter, message string) {
+	WriteJson(w, http.StatusInternalServerError, Message{
+		MessageStatus: "error",
+		Message:       message,
+	})
+}
+
+func StatusUnauthorized(w http.ResponseWriter, message string) {
+	WriteJson(w, http.StatusUnauthorized, Message{
+		MessageStatus: "error",
+		Message:       message,
+	})
 }

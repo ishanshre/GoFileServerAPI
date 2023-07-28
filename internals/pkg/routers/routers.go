@@ -21,5 +21,6 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 		MaxAge:           300,
 	})))
 	r.Use(middleware.Logger)
+
 	return r
 }

@@ -18,18 +18,20 @@ var (
 )
 
 type Claims struct {
-	Username string
-	ID       string
+	Username    string
+	ID          string
+	AccessLevel int
 	jwt.RegisteredClaims
 }
 
 type TokenDetail struct {
-	UserID    string
-	Username  string
-	Token     *string
-	TokenID   string
-	ExpiresAt time.Time
-	Subject   string
+	UserID      string
+	Username    string
+	AccessLevel int
+	Token       *string
+	TokenID     string
+	ExpiresAt   time.Time
+	Subject     string
 }
 
 type Token struct {
@@ -43,13 +45,13 @@ type LoginResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func GenerateLoginResponse(id, username string) (*LoginResponse, *Token, error) {
+func GenerateLoginResponse(id, username string, accessLevel int) (*LoginResponse, *Token, error) {
 	tokenID := uuid.NewV4().String()
-	accessTokenDetail, err := GenerateAccessToken(id, username, tokenID)
+	accessTokenDetail, err := GenerateAccessToken(id, username, tokenID, accessLevel)
 	if err != nil {
 		return nil, nil, errors.New("error generating access token")
 	}
-	refreshTokenDetail, err := GenerateRefreshToken(id, username, tokenID)
+	refreshTokenDetail, err := GenerateRefreshToken(id, username, tokenID, accessLevel)
 	if err != nil {
 		return nil, nil, errors.New("error generating refresh token")
 	}
@@ -64,10 +66,11 @@ func GenerateLoginResponse(id, username string) (*LoginResponse, *Token, error) 
 
 }
 
-func GenerateAccessToken(id, username, tokenID string) (*TokenDetail, error) {
+func GenerateAccessToken(id, username, tokenID string, accessLevel int) (*TokenDetail, error) {
 	access_claims := &Claims{
-		ID:       id,
-		Username: username,
+		ID:          id,
+		Username:    username,
+		AccessLevel: accessLevel,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: AccessExpiresAt,
 			ID:        tokenID,
@@ -82,18 +85,20 @@ func GenerateAccessToken(id, username, tokenID string) (*TokenDetail, error) {
 		return nil, err
 	}
 	return &TokenDetail{
-		UserID:    id,
-		Username:  username,
-		Token:     &tokenString,
-		TokenID:   access_claims.RegisteredClaims.ID,
-		ExpiresAt: access_claims.RegisteredClaims.ExpiresAt.Time,
-		Subject:   access_claims.RegisteredClaims.Subject,
+		UserID:      id,
+		Username:    username,
+		AccessLevel: accessLevel,
+		Token:       &tokenString,
+		TokenID:     access_claims.RegisteredClaims.ID,
+		ExpiresAt:   access_claims.RegisteredClaims.ExpiresAt.Time,
+		Subject:     access_claims.RegisteredClaims.Subject,
 	}, nil
 }
-func GenerateRefreshToken(id, username, tokenID string) (*TokenDetail, error) {
+func GenerateRefreshToken(id, username, tokenID string, accessLevel int) (*TokenDetail, error) {
 	refresh_token := &Claims{
-		ID:       id,
-		Username: username,
+		ID:          id,
+		Username:    username,
+		AccessLevel: accessLevel,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: RefreshExpiresAt,
 			ID:        tokenID,
@@ -108,11 +113,12 @@ func GenerateRefreshToken(id, username, tokenID string) (*TokenDetail, error) {
 		return nil, err
 	}
 	return &TokenDetail{
-		UserID:    id,
-		Username:  username,
-		Token:     &tokenString,
-		TokenID:   refresh_token.RegisteredClaims.ID,
-		ExpiresAt: refresh_token.RegisteredClaims.ExpiresAt.Time,
-		Subject:   refresh_token.RegisteredClaims.Subject,
+		UserID:      id,
+		Username:    username,
+		AccessLevel: accessLevel,
+		Token:       &tokenString,
+		TokenID:     refresh_token.RegisteredClaims.ID,
+		ExpiresAt:   refresh_token.RegisteredClaims.ExpiresAt.Time,
+		Subject:     refresh_token.RegisteredClaims.Subject,
 	}, nil
 }

@@ -6,11 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var accessLevel int = 1
+
 func TestGenerateAccessToken(t *testing.T) {
 	id := RandomAlphaNum(6)
 	username := RandomAlphapet(6)
 	tokenID := RandomAlphaNum(10)
-	tokenDetail, err := GenerateAccessToken(id, username, tokenID)
+
+	tokenDetail, err := GenerateAccessToken(id, username, tokenID, accessLevel)
 	assert.NoError(t, err)
 	assert.NotNil(t, tokenDetail)
 	assert.Equal(t, id, tokenDetail.UserID)
@@ -24,7 +27,7 @@ func TestGenerateRefreshToken_Failure(t *testing.T) {
 	id := RandomAlphaNum(6)
 	username := RandomAlphapet(6)
 	tokenID := RandomAlphaNum(10)
-	tokenDetail, err := GenerateRefreshToken(id, username, tokenID)
+	tokenDetail, err := GenerateRefreshToken(id, username, tokenID, accessLevel)
 	assert.NoError(t, err)
 	assert.NotNil(t, tokenDetail)
 	assert.Equal(t, id, tokenDetail.UserID)
@@ -38,7 +41,7 @@ func TestGenerateRefreshToken_Failure(t *testing.T) {
 func TestGenerateLoginResponse(t *testing.T) {
 	id := RandomAlphaNum(10)
 	username := RandomAlphaNum(6)
-	loginResponse, token, err := GenerateLoginResponse(id, username)
+	loginResponse, token, err := GenerateLoginResponse(id, username, accessLevel)
 	assert.NoError(t, err)
 	assert.NotNil(t, loginResponse)
 	assert.NotNil(t, token)
