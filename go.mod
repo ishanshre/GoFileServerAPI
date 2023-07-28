@@ -5,8 +5,10 @@ go 1.20
 require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.0.5
+	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.12.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
