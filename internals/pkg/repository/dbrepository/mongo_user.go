@@ -11,32 +11,35 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (m *mongoDbRepo) GetUsers(limit, page int64) ([]*models.User, error) {
+func (m *mongoDbRepo) GetUsers(limit, page int) ([]*models.User, error) {
+	// set limit timeout
 	ctx, cancel := context.WithTimeout(m.ctx, timeout)
 	defer cancel()
 
-	if limit <= 0 {
-		limit = 10
-	}
-	if page <= 0 {
+	// setup pagination condition
+	if page == 0 || page < 0 {
 		page = 1
+	}
+	if limit == 0 || limit < 0 {
+		limit = 10
 	}
 	skip := (page - 1) * limit
 	opt := options.FindOptions{}
-	opt.SetLimit(limit)
-	opt.SetSkip(skip)
+	opt.SetLimit(int64(limit))
+	opt.SetSkip(int64(skip))
+
 	query := bson.M{}
 
 	result, err := m.db.GetUserCollection().Find(ctx, query, &opt)
 	if err != nil {
-		return nil, errors.New("error in fetching all users")
+		return nil, errors.New("error in fetching users")
 	}
 	defer result.Close(ctx)
 	users := []*models.User{}
 	for result.Next(ctx) {
 		user := &models.User{}
 		if err := result.Decode(&user); err != nil {
-			return nil, errors.New("error in scanning user")
+			return nil, errors.New("error in unmarshling users")
 		}
 		users = append(users, user)
 	}

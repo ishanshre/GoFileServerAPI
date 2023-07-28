@@ -8,14 +8,14 @@ import (
 )
 
 func (h *handlers) GetUsers(w http.ResponseWriter, r *http.Request) {
-	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil {
-		limit = int64(10)
+		limit = 10
 	}
 
-	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
-		limit = int64(1)
+		page = 1
 	}
 
 	users, err := h.mg.GetUsers(limit, page)

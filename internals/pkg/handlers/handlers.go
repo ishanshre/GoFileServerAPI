@@ -13,8 +13,9 @@ import (
 )
 
 type Handlers interface {
-	RegisterUser(w http.ResponseWriter, r *http.Request)
+	UserRegister(w http.ResponseWriter, r *http.Request)
 	GetUsers(w http.ResponseWriter, r *http.Request)
+	UserLogin(w http.ResponseWriter, r *http.Request)
 }
 
 type handlers struct {

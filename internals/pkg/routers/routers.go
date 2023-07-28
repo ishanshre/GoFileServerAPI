@@ -21,7 +21,8 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 		MaxAge:           300,
 	})))
 	r.Use(middleware.Logger)
-	r.Post("/api/v1/register", h.RegisterUser)
+	r.Post("/api/v1/register", h.UserRegister)
+	r.Post("/api/v1/login", h.UserLogin)
 
 	r.Group(func(admin chi.Router) {
 		admin.Use(m.JwtAuth)

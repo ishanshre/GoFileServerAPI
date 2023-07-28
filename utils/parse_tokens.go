@@ -17,12 +17,13 @@ func VerifyTokenWithClaims(tokenString, subject string) (*TokenDetail, error) {
 		return nil, err
 	}
 	return &TokenDetail{
-		UserID:    claims.ID,
-		Username:  claims.Username,
-		Token:     &tokenString,
-		TokenID:   claims.RegisteredClaims.ID,
-		ExpiresAt: claims.RegisteredClaims.ExpiresAt.Time,
-		Subject:   claims.RegisteredClaims.Subject,
+		UserID:      claims.ID,
+		Username:    claims.Username,
+		AccessLevel: claims.AccessLevel,
+		Token:       &tokenString,
+		TokenID:     claims.RegisteredClaims.ID,
+		ExpiresAt:   claims.RegisteredClaims.ExpiresAt.Time,
+		Subject:     claims.RegisteredClaims.Subject,
 	}, nil
 }
 

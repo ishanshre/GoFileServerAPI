@@ -12,7 +12,7 @@ import (
 	"github.com/ishanshre/GoFileServerAPI/utils"
 )
 
-func (h *handlers) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) UserRegister(w http.ResponseWriter, r *http.Request) {
 	newUser := &models.CreateUser{}
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
 		helpers.StatusBadRequest(w, "error in parsing json/no json data")
@@ -56,4 +56,62 @@ func (h *handlers) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	helpers.StatusCreatedData(w, getUser)
+}
+
+func (h *handlers) UserLogin(w http.ResponseWriter, r *http.Request) {
+	user := &models.LoginUser{}
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		helpers.StatusBadRequest(w, "error in parsing json/no data")
+		return
+	}
+	if err := validate.Struct(user); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fieldName := err.Field()
+			if err.Tag() == "containsany" {
+				helpers.StatusBadRequest(w, fmt.Sprintf("%s must have at least one special characters from: %v", fieldName, err.Param()))
+				return
+			}
+			helpers.StatusBadRequest(w, fmt.Sprintf("%s must have at least one %s %v characters", fieldName, err.Tag(), err.Param()))
+		}
+		return
+	}
+	if err := h.mg.UsernameExists(user.Username); err == nil {
+		helpers.StatusBadRequest(w, "username does not exists")
+		return
+	}
+	getUser, err := h.mg.GetUserByUsername(user.Username)
+	if err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	if err := utils.ComparePassword(getUser.Password, user.Password); err != nil {
+		helpers.StatusBadRequest(w, "invalid username/password")
+		return
+	}
+	exists, err := h.redisClient.Exists(h.ctx, getUser.Username).Result()
+	if err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	if exists == 1 {
+		if err := h.redisClient.Del(h.ctx, getUser.Username).Err(); err != nil {
+			helpers.StatusInternalServerError(w, err.Error())
+			return
+		}
+	}
+	loginResponse, token, err := utils.GenerateLoginResponse(getUser.ID.Hex(), getUser.Username, getUser.AccessLevel)
+	if err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	tokenJson, err := json.Marshal(token)
+	if err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	if err := h.redisClient.Set(h.ctx, token.AccessToken.Username, tokenJson, time.Until(token.RefreshToken.ExpiresAt)).Err(); err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	helpers.StatusOkData(w, loginResponse)
 }

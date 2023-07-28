@@ -25,6 +25,11 @@ type CreateUser struct {
 	Password string `json:"password,omitempty" bson:"password,omitempty" validate:"required,min=8,max=30,containsany=!@#$%^&*(),uppercase,lowercase,number"`
 }
 
+type LoginUser struct {
+	Username string `json:"username,omitempty" bson:"username,omitempty,unique" validate:"required,min=5"`
+	Password string `json:"password,omitempty" bson:"password,omitempty" validate:"required,min=8,max=30,containsany=!@#$%^&*(),uppercase,lowercase,number"`
+}
+
 type File struct {
 	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	FilePath   string             `json:"filePath,omitempty" bson:"file,omitempty"`
