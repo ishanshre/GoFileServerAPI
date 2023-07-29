@@ -53,3 +53,9 @@ func StatusOkData(w http.ResponseWriter, data any) {
 		Data:          data,
 	})
 }
+func StatusOk(w http.ResponseWriter, message string) {
+	WriteJson(w, http.StatusOK, Message{
+		MessageStatus: "success",
+		Message:       message,
+	})
+}

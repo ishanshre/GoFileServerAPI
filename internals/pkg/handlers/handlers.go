@@ -16,6 +16,7 @@ type Handlers interface {
 	UserRegister(w http.ResponseWriter, r *http.Request)
 	GetUsers(w http.ResponseWriter, r *http.Request)
 	UserLogin(w http.ResponseWriter, r *http.Request)
+	UserLogout(w http.ResponseWriter, r *http.Request)
 }
 
 type handlers struct {

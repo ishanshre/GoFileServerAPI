@@ -12,6 +12,10 @@ import (
 	"github.com/ishanshre/GoFileServerAPI/utils"
 )
 
+const (
+	tokenDetailKey helpers.ContextKey = "tokenDetail"
+)
+
 func (h *handlers) UserRegister(w http.ResponseWriter, r *http.Request) {
 	newUser := &models.CreateUser{}
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
@@ -114,4 +118,28 @@ func (h *handlers) UserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	helpers.StatusOkData(w, loginResponse)
+}
+
+func (h *handlers) UserLogout(w http.ResponseWriter, r *http.Request) {
+	tokenDetail := r.Context().Value(tokenDetailKey).(*utils.TokenDetail)
+	if tokenDetail.Username == "" {
+		helpers.StatusUnauthorized(w, "user not authorized")
+		return
+	}
+	exists, err := h.redisClient.Exists(h.ctx, tokenDetail.Username).Result()
+	if err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	if exists == 0 {
+		helpers.StatusBadRequest(w, "user not logged in")
+		return
+	} else {
+		if err := h.redisClient.Del(h.ctx, tokenDetail.Username).Err(); err != nil {
+			helpers.StatusInternalServerError(w, err.Error())
+			return
+		}
+	}
+	helpers.StatusOk(w, "logout successfull")
+
 }

@@ -23,11 +23,14 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 	r.Use(middleware.Logger)
 	r.Post("/api/v1/register", h.UserRegister)
 	r.Post("/api/v1/login", h.UserLogin)
-
 	r.Group(func(admin chi.Router) {
 		admin.Use(m.JwtAuth)
 		admin.Use(m.CheckAdmin)
 		admin.Get("/api/v1/users", h.GetUsers)
+	})
+	r.Group(func(user chi.Router) {
+		user.Use(m.JwtAuth)
+		user.Post("/api/v1/logout", h.UserLogout)
 	})
 	return r
 }
