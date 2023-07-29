@@ -133,9 +133,12 @@ func (m *mongoDbRepo) UpdateUser(username string, update *models.User) (*models.
 	defer cancel()
 
 	query := bson.M{"username": username}
-	_, err := m.db.GetUserCollection().UpdateOne(ctx, query, update)
+
+	_, err := m.db.GetUserCollection().UpdateOne(ctx, query, bson.M{
+		"$set": update,
+	})
 	if err != nil {
-		return nil, errors.New("error in updating user")
+		return nil, err
 	}
 	user, err := m.GetUserByUsername(username)
 	if err != nil {

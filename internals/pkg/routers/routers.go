@@ -26,11 +26,15 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 	r.Group(func(admin chi.Router) {
 		admin.Use(m.JwtAuth)
 		admin.Use(m.CheckAdmin)
-		admin.Get("/api/v1/users", h.GetUsers)
+		admin.Get("/api/v1/admin/users", h.GetUsers)
+		admin.Get("/api/v1/admin/users/{username}", h.GetUser)
+		admin.Delete("/api/v1/admin/users/{username}", h.AdminDeleteUser)
 	})
 	r.Group(func(user chi.Router) {
 		user.Use(m.JwtAuth)
 		user.Post("/api/v1/logout", h.UserLogout)
+		user.Get("/api/v1/me", h.GetMe)
+		user.Delete("/api/v1/me", h.DeleteMe)
 	})
 	return r
 }

@@ -50,7 +50,7 @@ func (h *handlers) UserRegister(w http.ResponseWriter, r *http.Request) {
 		Username:    newUser.Username,
 		Email:       newUser.Email,
 		Password:    hashPassword,
-		AccessLevel: 1,
+		AccessLevel: 2,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -117,6 +117,8 @@ func (h *handlers) UserLogin(w http.ResponseWriter, r *http.Request) {
 		helpers.StatusInternalServerError(w, err.Error())
 		return
 	}
+	getUser.LastLogin = time.Now()
+	_, _ = h.mg.UpdateUser(getUser.Username, getUser)
 	helpers.StatusOkData(w, loginResponse)
 }
 

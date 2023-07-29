@@ -2,33 +2,40 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/helpers"
+	"github.com/ishanshre/GoFileServerAPI/utils"
 )
 
-func (h *handlers) GetUsers(w http.ResponseWriter, r *http.Request) {
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil {
-		limit = 10
-	}
-
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil {
-		page = 1
-	}
-
-	users, err := h.mg.GetUsers(limit, page)
-	if err != nil {
-		helpers.WriteJson(w, http.StatusInternalServerError, helpers.Message{
-			MessageStatus: "error",
-			Message:       err.Error(),
-		})
+func (h *handlers) GetMe(w http.ResponseWriter, r *http.Request) {
+	tokenDetail := r.Context().Value(tokenDetailKey).(*utils.TokenDetail)
+	if tokenDetail.Username == "" {
+		helpers.StatusUnauthorized(w, "user not authorized")
 		return
 	}
-	helpers.WriteJson(w, http.StatusOK, helpers.Message{
-		MessageStatus: "success",
-		Data:          users,
-	})
+	user, err := h.mg.GetUserByUsername(tokenDetail.Username)
+	if err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	helpers.StatusOkData(w, user)
+}
 
+func (h *handlers) DeleteMe(w http.ResponseWriter, r *http.Request) {
+	tokenDetail := r.Context().Value(tokenDetailKey).(*utils.TokenDetail)
+	if err := h.mg.UsernameExists(tokenDetail.Username); err == nil {
+		helpers.StatusBadRequest(w, "user does not exists")
+		return
+	}
+
+	if err := h.redisClient.Del(h.ctx, tokenDetail.Username).Err(); err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+
+	if err := h.mg.DeleteUser(tokenDetail.Username); err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+	helpers.StatusOk(w, "user deleted")
 }

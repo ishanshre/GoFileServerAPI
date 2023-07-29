@@ -13,10 +13,17 @@ import (
 )
 
 type Handlers interface {
-	UserRegister(w http.ResponseWriter, r *http.Request)
+	//admin interface
 	GetUsers(w http.ResponseWriter, r *http.Request)
+	AdminDeleteUser(w http.ResponseWriter, r *http.Request)
+	GetUser(w http.ResponseWriter, r *http.Request)
+
+	//user interface
+	UserRegister(w http.ResponseWriter, r *http.Request)
 	UserLogin(w http.ResponseWriter, r *http.Request)
 	UserLogout(w http.ResponseWriter, r *http.Request)
+	GetMe(w http.ResponseWriter, r *http.Request)
+	DeleteMe(w http.ResponseWriter, r *http.Request)
 }
 
 type handlers struct {

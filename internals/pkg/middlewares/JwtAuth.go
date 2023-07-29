@@ -67,7 +67,7 @@ func (m *middlewares) JwtAuth(next http.Handler) http.Handler {
 func (m *middlewares) CheckAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenDetail := r.Context().Value(tokenDetailKey).(*utils.TokenDetail)
-		if tokenDetail.AccessLevel != 0 {
+		if tokenDetail.AccessLevel != 1 {
 			helpers.StatusUnauthorized(w, "unauthorized access")
 			return
 		}
