@@ -12,6 +12,7 @@ type Middlewares interface {
 	JwtAuth(next http.Handler) http.Handler
 	CheckAdmin(next http.Handler) http.Handler
 	FileAuth(next http.Handler) http.Handler
+	FileOwner(next http.Handler) http.Handler
 }
 
 type middlewares struct {

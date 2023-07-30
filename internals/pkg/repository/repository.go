@@ -19,4 +19,5 @@ type Repository interface {
 	GetFileByFileName(filename string) (*models.File, error)
 	AllFilesByUser(username string, limit, page int) ([]*models.File, error)
 	FileNameExists(fileName string) error
+	FileDelete(fileName string) error
 }

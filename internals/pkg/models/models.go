@@ -46,7 +46,11 @@ type File struct {
 	Name       string             `json:"name,omitempty" bson:"name,omitempty"`
 	Extension  string             `json:"extension,omitempty" bson:"extension,omitempty"`
 	Size       int64              `json:"size,omitempty" bson:"size,omitempty"`
-	Uploader   *UserAccess        `json:"uplaoder,omitempty" bson:"uploader,omitempty"`
+	Uploader   *UserAccess        `json:"uploader,omitempty" bson:"uploader,omitempty"`
 	UploadedAt time.Time          `json:"uploaded_at,omitempty" bsom:"uploaded_at,omitempty"`
 	ModifiedAt time.Time          `json:"modified_at,omitempty" bson:"modified_at,omitempty"`
+}
+
+type FileName struct {
+	Name string `json:"name,omitempty" bson:"name,omitempty"`
 }

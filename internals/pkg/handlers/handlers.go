@@ -26,6 +26,8 @@ type Handlers interface {
 	// file interface
 	UploadSingleFile(w http.ResponseWriter, r *http.Request)
 	UploadMultipleFile(w http.ResponseWriter, r *http.Request)
+	GetAllFilesByUser(w http.ResponseWriter, r *http.Request)
+	DeleteFilesByUser(w http.ResponseWriter, r *http.Request)
 }
 
 type handlers struct {

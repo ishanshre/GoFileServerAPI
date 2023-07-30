@@ -3,6 +3,7 @@ package dbrepository
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -35,7 +36,7 @@ func (m *mongoDbRepo) GetFileByFileName(filename string) (*models.File, error) {
 }
 
 func (m *mongoDbRepo) AllFilesByUser(username string, limit, page int) ([]*models.File, error) {
-	ctx, cancel := context.WithTimeout(m.ctx, timeout)
+	ctx, cancel := context.WithTimeout(m.ctx, 10*time.Second)
 	defer cancel()
 
 	if limit <= 0 {
@@ -53,15 +54,15 @@ func (m *mongoDbRepo) AllFilesByUser(username string, limit, page int) ([]*model
 	filter := bson.M{
 		"uploader.username": username,
 	}
-	res, err := m.db.GetFileCollection().Find(ctx, filter, &opt)
+	result, err := m.db.GetFileCollection().Find(ctx, filter, &opt)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Close(ctx)
+	defer result.Close(ctx)
 	files := []*models.File{}
-	for res.Next(ctx) {
+	for result.Next(ctx) {
 		file := &models.File{}
-		if err := res.Decode(&file); err != nil {
+		if err := result.Decode(&file); err != nil {
 			return nil, err
 		}
 		files = append(files, file)
@@ -76,6 +77,21 @@ func (m *mongoDbRepo) FileNameExists(fileName string) error {
 	err := m.db.GetFileCollection().FindOne(ctx, bson.M{"name": fileName}).Decode(&existingFile)
 	if err == nil {
 		return errors.New("username already exists")
+	}
+	return nil
+}
+
+func (m *mongoDbRepo) FileDelete(fileName string) error {
+	ctx, cancel := context.WithTimeout(m.ctx, timeout)
+	defer cancel()
+
+	query := bson.M{"name": fileName}
+	res, err := m.db.GetFileCollection().DeleteOne(ctx, query)
+	if err != nil {
+		return err
+	}
+	if res.DeletedCount == 0 {
+		return errors.New("no record deleted")
 	}
 	return nil
 }

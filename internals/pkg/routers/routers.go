@@ -41,6 +41,13 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 		user.Delete("/api/v1/me", h.DeleteMe)
 		user.Post("/api/v1/upload", h.UploadSingleFile)
 		user.Post("/api/v1/upload-many", h.UploadMultipleFile)
+		user.Get("/api/v1/{username}/files", h.GetAllFilesByUser)
+	})
+	r.Group(func(owner chi.Router) {
+		owner.Use(m.JwtAuth)
+		owner.Use(m.FileOwner)
+		owner.Delete("/api/v1/{username}/files", h.DeleteFilesByUser)
+
 	})
 	return r
 }
