@@ -2,6 +2,7 @@ package dbrepository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -66,4 +67,15 @@ func (m *mongoDbRepo) AllFilesByUser(username string, limit, page int) ([]*model
 		files = append(files, file)
 	}
 	return files, nil
+}
+
+func (m *mongoDbRepo) FileNameExists(fileName string) error {
+	ctx, cancel := context.WithTimeout(m.ctx, timeout)
+	defer cancel()
+	existingFile := &models.File{}
+	err := m.db.GetFileCollection().FindOne(ctx, bson.M{"name": fileName}).Decode(&existingFile)
+	if err == nil {
+		return errors.New("username already exists")
+	}
+	return nil
 }

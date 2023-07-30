@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"time"
@@ -29,6 +30,10 @@ func (h *handlers) UploadSingleFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userPath := filepath.Join(root_path, tokenDetail.Username)
+	if err := h.mg.FileNameExists(files[0].Filename); err != nil {
+		helpers.StatusBadRequest(w, "file already exists! ignoring it")
+		return
+	}
 	fileName, size, err := helpers.UploadFile(w, userPath, files[0])
 	if err != nil {
 		helpers.StatusInternalServerError(w, err.Error())
@@ -108,7 +113,12 @@ func (h *handlers) UploadMultipleFile(w http.ResponseWriter, r *http.Request) {
 	}
 	userPath := filepath.Join(root_path, tokenDetail.Username)
 	fileDatas := []*models.File{}
+	errors := []string{}
 	for _, fileHeader := range files {
+		if err := h.mg.FileNameExists(fileHeader.Filename); err != nil {
+			errors = append(errors, fmt.Sprintf("file %s already exists. Ignoring it", fileHeader.Filename))
+			continue
+		}
 		fileName, size, err := helpers.UploadFile(w, userPath, fileHeader)
 		if err != nil {
 			helpers.StatusInternalServerError(w, err.Error())
@@ -133,6 +143,10 @@ func (h *handlers) UploadMultipleFile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fileDatas = append(fileDatas, res)
+	}
+	if len(fileDatas) == 0 {
+		helpers.StatusBadRequestData(w, errors)
+		return
 	}
 	helpers.StatusCreatedData(w, fileDatas)
 }

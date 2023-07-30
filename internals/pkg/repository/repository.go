@@ -18,4 +18,5 @@ type Repository interface {
 	InsertFileData(file *models.File) (*models.File, error)
 	GetFileByFileName(filename string) (*models.File, error)
 	AllFilesByUser(username string, limit, page int) ([]*models.File, error)
+	FileNameExists(fileName string) error
 }
