@@ -40,6 +40,7 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 		user.Get("/api/v1/me", h.GetMe)
 		user.Delete("/api/v1/me", h.DeleteMe)
 		user.Post("/api/v1/upload", h.UploadSingleFile)
+		user.Post("/api/v1/upload-many", h.UploadMultipleFile)
 	})
 	return r
 }
