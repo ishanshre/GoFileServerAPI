@@ -11,37 +11,55 @@ import (
 type Database interface {
 	GetUserCollection() *mongo.Collection
 	GetFileCollection() *mongo.Collection
+	Close()
+	StartTranscation() error
+	EndTranscation() error
+	CommitTranscation() error
 }
 
 type database struct {
-	client *mongo.Client
-	ctx    context.Context
+	client  *mongo.Client
+	session mongo.Session
+	ctx     context.Context
 }
 
 func NewDatabase(dsn string, ctx context.Context) (Database, error) {
-	client, err := Connect(dsn, ctx)
+	client, session, err := Connect(dsn, ctx)
 	if err != nil {
 		return nil, err
 	}
 	return &database{
-		client: client,
-		ctx:    ctx,
+		client:  client,
+		session: session,
+		ctx:     ctx,
 	}, nil
 }
 
-func Connect(dsn string, ctx context.Context) (*mongo.Client, error) {
+func Connect(dsn string, ctx context.Context) (*mongo.Client, mongo.Session, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	clientOptions := options.Client().ApplyURI(dsn)
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := client.Ping(ctx, nil); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return client, nil
+
+	session, err := client.StartSession()
+	if err != nil {
+		return nil, nil, err
+	}
+	return client, session, nil
+}
+
+func (d *database) Close() {
+	if d.session != nil {
+		d.session.EndSession(d.ctx)
+	}
+	d.client.Disconnect(d.ctx)
 }
 
 func (d *database) GetUserCollection() *mongo.Collection {
@@ -50,4 +68,16 @@ func (d *database) GetUserCollection() *mongo.Collection {
 
 func (d *database) GetFileCollection() *mongo.Collection {
 	return d.client.Database("myDB").Collection("files")
+}
+
+func (d *database) StartTranscation() error {
+	return d.session.StartTransaction()
+}
+
+func (d *database) EndTranscation() error {
+	return d.session.AbortTransaction(d.ctx)
+}
+
+func (d *database) CommitTranscation() error {
+	return d.session.CommitTransaction(d.ctx)
 }

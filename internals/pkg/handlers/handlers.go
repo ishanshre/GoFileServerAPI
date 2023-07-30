@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/ishanshre/GoFileServerAPI/internals/pkg/database"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/repository"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/validators"
 	"github.com/redis/go-redis/v9"
@@ -34,11 +35,12 @@ type handlers struct {
 	mg          repository.Repository
 	ctx         context.Context
 	redisClient *redis.Client
+	db          database.Database
 }
 
 var validate *validator.Validate
 
-func NewHandlers(repository repository.Repository, r *redis.Client, ctx context.Context) Handlers {
+func NewHandlers(repository repository.Repository, r *redis.Client, ctx context.Context, db database.Database) Handlers {
 	validate = validator.New()
 	validate.RegisterValidation("uppercase", validators.Uppercase)
 	validate.RegisterValidation("lowercase", validators.LowerCase)
@@ -47,5 +49,6 @@ func NewHandlers(repository repository.Repository, r *redis.Client, ctx context.
 		mg:          repository,
 		redisClient: r,
 		ctx:         ctx,
+		db:          db,
 	}
 }

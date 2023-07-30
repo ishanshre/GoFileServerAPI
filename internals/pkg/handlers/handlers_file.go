@@ -176,10 +176,24 @@ const fileKey helpers.ContextKey = "fileKey"
 
 func (h *handlers) DeleteFilesByUser(w http.ResponseWriter, r *http.Request) {
 	fileData := r.Context().Value(fileKey).(*models.File)
+	if err := h.db.StartTranscation(); err != nil {
+		helpers.StatusInternalServerError(w, err.Error())
+		return
+	}
+
+	defer func() {
+		if err := h.db.CommitTranscation(); err != nil {
+			h.db.EndTranscation()
+			helpers.StatusInternalServerError(w, err.Error())
+			return
+		}
+	}()
+
 	if err := h.mg.FileDelete(fileData.Name); err != nil {
 		helpers.StatusInternalServerError(w, err.Error())
 		return
 	}
+
 	relatetivePath := filepath.Join("./", fileData.FilePath, fileData.Name)
 	if err := os.Remove(relatetivePath); err != nil {
 		helpers.StatusInternalServerError(w, err.Error())
