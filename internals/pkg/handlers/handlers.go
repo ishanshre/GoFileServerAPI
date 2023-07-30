@@ -5,9 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/ishanshre/GoFileServerAPI/internals/pkg/database"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/repository"
-	"github.com/ishanshre/GoFileServerAPI/internals/pkg/repository/dbrepository"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/validators"
 	"github.com/redis/go-redis/v9"
 )
@@ -24,6 +22,9 @@ type Handlers interface {
 	UserLogout(w http.ResponseWriter, r *http.Request)
 	GetMe(w http.ResponseWriter, r *http.Request)
 	DeleteMe(w http.ResponseWriter, r *http.Request)
+
+	// file interface
+	UploadSingleFile(w http.ResponseWriter, r *http.Request)
 }
 
 type handlers struct {
@@ -34,13 +35,13 @@ type handlers struct {
 
 var validate *validator.Validate
 
-func NewHandlers(database database.Database, r *redis.Client, ctx context.Context) Handlers {
+func NewHandlers(repository repository.Repository, r *redis.Client, ctx context.Context) Handlers {
 	validate = validator.New()
 	validate.RegisterValidation("uppercase", validators.Uppercase)
 	validate.RegisterValidation("lowercase", validators.LowerCase)
 	validate.RegisterValidation("number", validators.Number)
 	return &handlers{
-		mg:          dbrepository.NewMongoDbRepo(database, ctx),
+		mg:          repository,
 		redisClient: r,
 		ctx:         ctx,
 	}

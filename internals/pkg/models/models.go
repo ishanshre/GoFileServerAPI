@@ -34,13 +34,19 @@ type Username struct {
 	Username string `json:"username" bson:"username" validate:"required,min=5"`
 }
 
+type UserAccess struct {
+	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Username    string             `json:"username,omitempty" bson:"username,omitempty,unique"`
+	AccessLevel int                `json:"access_level,omitempty" bson:"access_level,omitempty"`
+}
+
 type File struct {
 	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	FilePath   string             `json:"filePath,omitempty" bson:"file,omitempty"`
 	Name       string             `json:"name,omitempty" bson:"name,omitempty"`
 	Extension  string             `json:"extension,omitempty" bson:"extension,omitempty"`
 	Size       int64              `json:"size,omitempty" bson:"size,omitempty"`
-	Uploader   *User              `json:"uplaoder,omitempty" bson:"uploader,omitempty"`
+	Uploader   *UserAccess        `json:"uplaoder,omitempty" bson:"uploader,omitempty"`
 	UploadedAt time.Time          `json:"uploaded_at,omitempty" bsom:"uploaded_at,omitempty"`
 	ModifiedAt time.Time          `json:"modified_at,omitempty" bson:"modified_at,omitempty"`
 }

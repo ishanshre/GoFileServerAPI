@@ -21,6 +21,10 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 		MaxAge:           300,
 	})))
 	r.Use(middleware.Logger)
+
+	fileServer := http.FileServer(http.Dir("./media/"))
+	r.Handle("/media/*", m.JwtAuth(m.FileAuth(http.StripPrefix("/media", fileServer))))
+
 	r.Post("/api/v1/register", h.UserRegister)
 	r.Post("/api/v1/login", h.UserLogin)
 	r.Group(func(admin chi.Router) {
@@ -35,6 +39,7 @@ func NewRouter(h handlers.Handlers, m middlewares.Middlewares) http.Handler {
 		user.Post("/api/v1/logout", h.UserLogout)
 		user.Get("/api/v1/me", h.GetMe)
 		user.Delete("/api/v1/me", h.DeleteMe)
+		user.Post("/api/v1/upload", h.UploadSingleFile)
 	})
 	return r
 }

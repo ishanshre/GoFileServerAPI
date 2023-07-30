@@ -13,4 +13,9 @@ type Repository interface {
 	DeleteUser(username string) error
 	CreateUser(user *models.User) (*models.User, error)
 	UpdateUser(username string, update *models.User) (*models.User, error)
+
+	// file interface
+	InsertFileData(file *models.File) (*models.File, error)
+	GetFileByFileName(filename string) (*models.File, error)
+	AllFilesByUser(username string, limit, page int) ([]*models.File, error)
 }

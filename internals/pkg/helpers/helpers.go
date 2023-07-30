@@ -39,6 +39,12 @@ func StatusBadRequest(w http.ResponseWriter, message string) {
 		Message:       message,
 	})
 }
+func StatusNotFound(w http.ResponseWriter, message string) {
+	WriteJson(w, http.StatusNotFound, Message{
+		MessageStatus: "error",
+		Message:       message,
+	})
+}
 
 func StatusCreatedData(w http.ResponseWriter, data any) {
 	WriteJson(w, http.StatusCreated, Message{

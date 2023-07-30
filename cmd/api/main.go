@@ -11,6 +11,7 @@ import (
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/database"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/handlers"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/middlewares"
+	"github.com/ishanshre/GoFileServerAPI/internals/pkg/repository/dbrepository"
 	"github.com/ishanshre/GoFileServerAPI/internals/pkg/routers"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -65,7 +66,8 @@ func run() (handlers.Handlers, middlewares.Middlewares, error) {
 			MinIdleConns: 0,
 		},
 	)
-	handler := handlers.NewHandlers(database, redisPool, ctx)
-	middleware := middlewares.NewMiddlwares(redisPool, ctx)
+	repository := dbrepository.NewMongoDbRepo(database, ctx)
+	handler := handlers.NewHandlers(repository, redisPool, ctx)
+	middleware := middlewares.NewMiddlwares(redisPool, repository, ctx)
 	return handler, middleware, nil
 }
