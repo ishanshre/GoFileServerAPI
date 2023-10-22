@@ -36,7 +36,12 @@ func init() {
 }
 
 func main() {
-	handler, middleware, err := run()
+	database, err := database.NewDatabase(dsn, ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	defer database.Close()
+	handler, middleware, err := run(database)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,11 +56,8 @@ func main() {
 	}
 }
 
-func run() (handlers.Handlers, middlewares.Middlewares, error) {
-	database, err := database.NewDatabase(dsn, ctx)
-	if err != nil {
-		return nil, nil, err
-	}
+func run(database database.Database) (handlers.Handlers, middlewares.Middlewares, error) {
+
 	redisPool := redis.NewClient(
 		&redis.Options{
 			Addr:         os.Getenv("REDIS_URL"),
@@ -67,7 +69,7 @@ func run() (handlers.Handlers, middlewares.Middlewares, error) {
 		},
 	)
 	repository := dbrepository.NewMongoDbRepo(database, ctx)
-	handler := handlers.NewHandlers(repository, redisPool, ctx)
+	handler := handlers.NewHandlers(repository, redisPool, ctx, database)
 	middleware := middlewares.NewMiddlwares(redisPool, repository, ctx)
 	return handler, middleware, nil
 }
